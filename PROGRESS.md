@@ -12,34 +12,46 @@
 src/
 ├── lib/
 │   ├── crypto.ts                  # AES-256-GCM 暗号化/復号ユーティリティ
-│   ├── supabase.ts                # Supabase クライアント + 型定義
-│   ├── gemini.ts                  # Gemini ツイート生成（googleSearch・ネタ被り防止・トレンド注入）
+│   ├── supabase.ts                # Supabase クライアント + 型定義（Post.tweet_id / PostMetric 追加）
+│   ├── gemini.ts                  # Gemini ツイート生成（トレンド・高エンゲージメントパターン注入）
 │   ├── line.ts                    # LINE 通知送信 + レビュー中 post_id 管理
-│   └── twitter.ts                 # X API 投稿（crypto.ts 経由で認証情報復号）
+│   └── twitter.ts                 # X API 投稿 + エンゲージメント指標取得
 ├── app/
 │   ├── dashboard/
-│   │   ├── page.tsx               # Server Component: 初期データ取得 → DashboardClient へ渡す
-│   │   ├── DashboardClient.tsx    # Client Component: ペルソナ一覧・投稿履歴・生成トリガー
-│   │   └── page.module.css        # ダッシュボード用スタイル（CSS Modules）
+│   │   ├── page.tsx               # Server Component: 初期データ取得
+│   │   ├── DashboardClient.tsx    # Client Component: ペルソナ管理UI + 投稿履歴
+│   │   ├── page.module.css        # ダッシュボード用スタイル（CSS Modules）
+│   │   └── trends/
+│   │       ├── page.tsx           # トレンドレポート閲覧ページ（カテゴリ別・日付グループ）
+│   │       └── trends.module.css  # トレンドページ用スタイル
 │   └── api/
 │       ├── generate/
-│       │   └── route.ts           # POST /api/generate: ペルソナごとにツイート生成→DB保存（トレンド参照）
+│       │   └── route.ts           # POST /api/generate: トレンド + 高エンゲージメントパターン注入
+│       ├── personas/
+│       │   └── route.ts           # POST/DELETE /api/personas: ペルソナCRUD（サーバー側暗号化）
 │       ├── cron/
-│       │   └── collect/
-│       │       └── route.ts       # GET /api/cron/collect: 毎朝トレンド収集→DB保存→MD出力
+│       │   ├── collect/
+│       │   │   └── route.ts       # GET /api/cron/collect: 毎朝トレンド収集（10:00 JST）
+│       │   ├── metrics/
+│       │   │   └── route.ts       # GET /api/cron/metrics: エンゲージメント収集（毎朝 12:00 JST）
+│       │   └── post-scheduled/
+│       │       └── route.ts       # GET /api/cron/post-scheduled: スケジュール投稿（30分ごと）
 │       ├── line/
 │       │   └── webhook/
 │       │       └── route.ts       # POST /api/line/webhook: 署名検証・承認/却下処理
 │       └── post/
-│           └── route.ts           # POST /api/post: approved 投稿を X に投稿→posted に更新
+│           └── route.ts           # POST /api/post: approved 投稿を X に投稿→tweet_id 保存
 supabase/
-└── schema.sql                     # personas / posts / settings / daily_trends テーブル DDL
+└── schema.sql                     # 全テーブル DDL（posts 拡張・post_metrics・daily_trends 追加）
 daily_trend/
-└── yyyy_mm_dd.md                  # Cronジョブが毎朝生成するトレンドレポート（ローカル出力先）
-vercel.json                        # Vercel Cron スケジュール（毎朝 10:00 JST = UTC 01:00）
+└── yyyy_mm_dd.md                  # Cronジョブが毎朝生成するトレンドレポート
+vercel.json                        # Vercel Cron × 3（collect / metrics / post-scheduled）
 tests/
 └── api/
-    └── cron-collect-logic.test.mjs  # cron/collect コアロジックのユニットテスト（11テスト）
+    ├── cron-collect-logic.test.mjs    # 11テスト
+    ├── cron-metrics-logic.test.mjs    # 8テスト
+    ├── cron-scheduled-logic.test.mjs  # 8テスト
+    └── personas-api-logic.test.mjs    # 10テスト
 ```
 
 ## Stepの進捗
@@ -49,7 +61,10 @@ tests/
 - [x] Step 4: LINE Webhook + 通知送信
 - [x] Step 5: X API投稿実行（暗号化復号）
 - [x] Step 6: ダッシュボードUI
-- [x] Step 7: トレンド収集エンジン（daily_trends テーブル・Cron API・ツイート生成への統合）
+- [x] Step 7: トレンド収集エンジン（daily_trends・Cron・ツイート生成統合）
+- [x] Step 8: エンゲージメント収集 + フィードバックループ（post_metrics・cron/metrics・Gemini注入）
+- [x] Step 9: スケジュール投稿（posts.scheduled_at・cron/post-scheduled）
+- [x] Step 10: ダッシュボード強化（ペルソナ管理UI・トレンドレポート閲覧ページ）
 
 ## 環境変数
 | キー名 | 用途 | 設定済み |
@@ -67,9 +82,10 @@ tests/
 | X_ACCESS_SECRET | X Access Secret（暗号化してDB保存） | ✅ |
 
 ## 未解決の課題
-- Supabase SQL Editor で `daily_trends` テーブルのDDLを手動実行すること（schema.sql の末尾に追記済み）
-- CRON_SECRET 環境変数を Vercel に設定するとcronの不正呼び出しを防げる（任意）
+- Supabase SQL Editor で schema.sql の差分 DDL（posts 拡張 + post_metrics + daily_trends）を手動実行すること
+- CRON_SECRET 環境変数を Vercel に設定するとCron不正呼び出しを防げる（任意）
 - Vercel 本番環境ではファイルシステムへの書き込みが非永続のため、`daily_trend/` MDファイルは `/tmp` に一時出力される（DBへの保存は永続）
+- X API public_metrics はBasic Access以上が必要（エンゲージメント収集 cron/metrics の前提）
 
 ## デプロイ
 - URL: https://engineer-auto-post-nmg6c5efe-hayasin2004s-projects.vercel.app

@@ -1,0 +1,148 @@
+/* ============================================================
+   Trends Page – CSS Modules
+   ============================================================ */
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+  font-family: var(--font-geist-sans, sans-serif);
+  color: #1a1a1a;
+}
+
+.header {
+  margin-bottom: 40px;
+}
+
+.backLink {
+  display: inline-block;
+  font-size: 0.88rem;
+  color: #6b7280;
+  text-decoration: none;
+  margin-bottom: 12px;
+  transition: color 0.15s;
+}
+
+.backLink:hover {
+  color: #1a1a1a;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 6px;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ---- 日付セクション ---- */
+.daySection {
+  margin-bottom: 48px;
+}
+
+.dateHeading {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 16px;
+  padding: 6px 14px;
+  background: #1a1a1a;
+  color: #fff;
+  border-radius: 8px;
+  display: inline-block;
+  letter-spacing: 0.02em;
+}
+
+/* ---- カテゴリグリッド ---- */
+.categoryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .categoryGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- カテゴリカード ---- */
+.categoryCard {
+  border-radius: 10px;
+  padding: 18px 20px;
+  border: 1px solid transparent;
+}
+
+.categoryLabel {
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin: 0 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.categoryContent {
+  font-size: 0.9rem;
+  line-height: 1.75;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ---- カテゴリ別カラー ---- */
+.cat_tech {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.cat_tech .categoryLabel {
+  color: #1d4ed8;
+}
+
+.cat_market {
+  background: #ecfdf5;
+  border-color: #6ee7b7;
+}
+
+.cat_market .categoryLabel {
+  color: #065f46;
+}
+
+.cat_sns {
+  background: #fdf4ff;
+  border-color: #e9d5ff;
+}
+
+.cat_sns .categoryLabel {
+  color: #7e22ce;
+}
+
+.cat_local {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.cat_local .categoryLabel {
+  color: #92400e;
+}
+
+/* ---- 空状態 ---- */
+.empty {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.95rem;
+  padding: 64px 0;
+  line-height: 2;
+}
+
+.empty code {
+  background: #f3f4f6;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: monospace;
+  color: #374151;
+}

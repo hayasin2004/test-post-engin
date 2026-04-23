@@ -37,9 +37,14 @@ function extractTokens(text: string): string[] {
 
 /**
  * 指定ペルソナのツイート候補を Gemini で生成する
- * @param todayTrends daily_trends テーブルから取得した本日のトレンド文字列（任意）
+ * @param todayTrends  daily_trends テーブルから取得した本日のトレンド文字列（任意）
+ * @param topPosts     過去の高エンゲージメント投稿の内容一覧（任意、フィードバックループ用）
  */
-export async function generateTweet(persona: Persona, todayTrends?: string): Promise<string> {
+export async function generateTweet(
+  persona: Persona,
+  todayTrends?: string,
+  topPosts?: string[]
+): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) throw new Error('GEMINI_API_KEY が設定されていません')
 
@@ -75,6 +80,12 @@ export async function generateTweet(persona: Persona, todayTrends?: string): Pro
     ? `\n\n【本日の参考情報】\n以下のトレンドを参考に、キャラクターの視点から自然に話題に盛り込んでください（強制はしない）。\n${todayTrends}`
     : ''
 
+  // 高エンゲージメント投稿のパターンを注入（フィードバックループ）
+  const topPostsSection =
+    topPosts && topPosts.length > 0
+      ? `\n\n【過去に反応が良かった投稿（文体・話題の傾向を参考に）】\n${topPosts.slice(0, 5).join('\n')}`
+      : ''
+
   const prompt = `あなたは「${persona.name}」というSNSキャラクターです。
 口調: ${persona.tone}
 得意トピック: ${persona.topics.join(', ')}
@@ -83,7 +94,7 @@ export async function generateTweet(persona: Persona, todayTrends?: string): Pro
 - 140文字以内（日本語）
 - ハッシュタグは1〜2個まで
 - 宣伝・商品紹介は禁止
-- 過去の投稿と同じ話題は避けること${recentSummary}${trendsSection}
+- 過去の投稿と同じ話題は避けること${recentSummary}${trendsSection}${topPostsSection}
 
 投稿文のみを出力してください（前置き・解説・引用符は不要）。`
 

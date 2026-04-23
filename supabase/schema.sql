@@ -73,6 +73,39 @@ CREATE TRIGGER trg_settings_updated_at
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- ============================================================
+-- posts テーブルへのカラム追加（既存テーブルの拡張）
+-- ============================================================
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS tweet_id     TEXT;
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS scheduled_at TIMESTAMPTZ;
+
+COMMENT ON COLUMN posts.tweet_id     IS 'X API で投稿した際のツイートID（status=posted のときのみセット）';
+COMMENT ON COLUMN posts.scheduled_at IS '指定時刻に自動投稿するスケジュール日時（NULLは即時承認フロー）';
+
+CREATE INDEX IF NOT EXISTS idx_posts_scheduled ON posts(scheduled_at)
+  WHERE status = 'approved' AND scheduled_at IS NOT NULL;
+
+-- ============================================================
+-- post_metrics テーブル（エンゲージメント収集）
+-- ============================================================
+CREATE TABLE IF NOT EXISTS post_metrics (
+  id           UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
+  post_id      UUID        NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+  tweet_id     TEXT        NOT NULL,
+  likes        INTEGER     NOT NULL DEFAULT 0,
+  retweets     INTEGER     NOT NULL DEFAULT 0,
+  impressions  INTEGER     NOT NULL DEFAULT 0,
+  collected_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+COMMENT ON TABLE  post_metrics             IS 'X API から定期収集したエンゲージメント指標';
+COMMENT ON COLUMN post_metrics.likes       IS 'いいね数';
+COMMENT ON COLUMN post_metrics.retweets    IS 'RT + 引用RT 数';
+COMMENT ON COLUMN post_metrics.impressions IS 'インプレッション数';
+
+CREATE INDEX IF NOT EXISTS idx_post_metrics_post_id  ON post_metrics(post_id);
+CREATE INDEX IF NOT EXISTS idx_post_metrics_tweet_id ON post_metrics(tweet_id);
+
+-- ============================================================
 -- daily_trends テーブル（トレンド収集エンジン用）
 -- ============================================================
 CREATE TABLE IF NOT EXISTS daily_trends (

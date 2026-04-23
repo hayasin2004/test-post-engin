@@ -1,0 +1,377 @@
+/* ============================================================
+   Dashboard – CSS Modules（Tailwind 禁止）
+   ============================================================ */
+
+/* ---- レイアウト ---- */
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+  font-family: var(--font-geist-sans, sans-serif);
+  color: #1a1a1a;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+/* ---- 生成ボタン ---- */
+.generateBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  background: #0070f3;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.1s;
+}
+
+.generateBtn:hover:not(:disabled) {
+  background: #005ce6;
+}
+
+.generateBtn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.generateBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ---- フィードバックバナー ---- */
+.feedback {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 24px;
+}
+
+.feedbackSuccess {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+
+.feedbackError {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+/* ---- セクション ---- */
+.section {
+  margin-bottom: 48px;
+}
+
+.sectionTitle {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+/* ---- ペルソナカード ---- */
+.personaGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.personaCard {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+
+.personaName {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+
+.personaTone {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0 0 10px;
+}
+
+.personaTopics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.topicTag {
+  font-size: 0.78rem;
+  padding: 2px 10px;
+  background: #e0e7ff;
+  color: #3730a3;
+  border-radius: 999px;
+}
+
+/* ---- 投稿フィルター ---- */
+.filterBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.filterBtn {
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.filterBtn:hover {
+  background: #f3f4f6;
+}
+
+.filterBtnActive {
+  background: #1a1a1a;
+  color: #fff;
+  border-color: #1a1a1a;
+}
+
+/* ---- 投稿カード ---- */
+.postList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.postCard {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+
+.postMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.personaLabel {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.postDate {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  margin-left: auto;
+}
+
+.postContent {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ---- ステータスバッジ ---- */
+.badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+
+.badgeGenerated {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.badgeApproved {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.badgePosted {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+
+.badgeRejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* ---- 空・ローディング ---- */
+.empty {
+  color: #9ca3af;
+  font-size: 0.9rem;
+  padding: 24px 0;
+  text-align: center;
+}
+
+/* ---- ヘッダーアクション ---- */
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.linkBtn {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 18px;
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.linkBtn:hover {
+  background: #e5e7eb;
+}
+
+/* ---- セクションヘッダー ---- */
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.sectionHeader .sectionTitle {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+/* ---- 追加ボタン ---- */
+.addBtn {
+  padding: 6px 16px;
+  background: #fff;
+  border: 1px solid #6366f1;
+  color: #6366f1;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.addBtn:hover {
+  background: #eef2ff;
+}
+
+/* ---- ペルソナ追加フォーム ---- */
+.addForm {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.formRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.formLabel {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.formInput {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.formInput:focus {
+  border-color: #6366f1;
+}
+
+/* ---- ペルソナカードヘッダー ---- */
+.personaCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.personaCardHeader .personaName {
+  margin: 0;
+}
+
+/* ---- 削除ボタン ---- */
+.deleteBtn {
+  padding: 3px 10px;
+  background: transparent;
+  border: 1px solid #fca5a5;
+  color: #b91c1c;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.deleteBtn:hover:not(:disabled) {
+  background: #fee2e2;
+}
+
+.deleteBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---- スケジュールラベル ---- */
+.scheduledLabel {
+  font-size: 0.78rem;
+  color: #d97706;
+  font-weight: 500;
+  background: #fffbeb;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid #fde68a;
+}

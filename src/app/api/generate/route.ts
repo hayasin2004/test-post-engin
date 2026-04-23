@@ -19,8 +19,9 @@ import { sendTweetNotification } from '@/lib/line'
  * }
  */
 export async function POST() {
-  // 本日のトレンド情報を取得（収集済みであればプロンプトに注入する）
-  const today = new Date().toISOString().slice(0, 10)
+  // 本日のトレンド情報を取得（JSTで日付計算）
+  const jstNow = new Date(Date.now() + 9 * 60 * 60 * 1000)
+  const today = jstNow.toISOString().slice(0, 10)
   const { data: trendsData } = await supabase
     .from('daily_trends')
     .select('topic_category, content')
@@ -32,6 +33,19 @@ export async function POST() {
           .map((t) => `[${t.topic_category}]\n${t.content}`)
           .join('\n\n')
       : undefined
+
+  // エンゲージメント上位5件の投稿内容を取得（フィードバックループ）
+  const { data: topMetrics } = await supabase
+    .from('post_metrics')
+    .select('posts(content)')
+    .order('likes', { ascending: false })
+    .limit(5)
+
+  const topPosts = (
+    topMetrics as Array<{ posts: { content: string } | null }> | null
+  )
+    ?.map((m) => m.posts?.content)
+    .filter((c): c is string => typeof c === 'string') ?? []
 
   // 全ペルソナを取得
   const { data: personas, error: fetchError } = await supabase
@@ -59,8 +73,8 @@ export async function POST() {
 
   for (const persona of personas as Persona[]) {
     const result = await (async () => {
-      // Gemini でツイート生成（本日のトレンドがあれば参考情報として注入）
-      const content = await generateTweet(persona, todayTrends)
+      // Gemini でツイート生成（トレンド + エンゲージメント上位パターンを注入）
+      const content = await generateTweet(persona, todayTrends, topPosts)
 
       // posts テーブルへ保存
       const { data: post, error: insertError } = await supabase
