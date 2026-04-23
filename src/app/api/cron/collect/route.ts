@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { GoogleGenerativeAI, Tool } from '@google/generative-ai'
 import { supabase } from '@/lib/supabase'
+import { sendTrendReport, type TrendEntry } from '@/lib/line'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 
@@ -68,8 +69,11 @@ export async function GET(request: Request) {
   const tools: Tool[] = [{ googleSearch: {} } as unknown as Tool]
   const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash', tools })
 
-  const today = new Date().toISOString().slice(0, 10) // yyyy-mm-dd
+  // JSTで今日の日付を計算（UTC+9）
+  const jstNow = new Date(Date.now() + 9 * 60 * 60 * 1000)
+  const today = jstNow.toISOString().slice(0, 10) // yyyy-mm-dd
   const sections: string[] = []
+  const contentMap = new Map<string, string>() // category.key → content
   const results: Array<{ category: string; success: boolean; error?: string }> = []
 
   for (const cat of CATEGORIES) {
@@ -77,19 +81,24 @@ export async function GET(request: Request) {
       const geminiResult = await model.generateContent(cat.prompt)
       const content = geminiResult.response.text().trim()
 
-      const { error: insertError } = await supabase.from('daily_trends').insert({
-        date: today,
-        topic_category: cat.key,
-        content,
-        raw_data: {
-          model: 'gemini-2.5-flash',
-          generated_at: new Date().toISOString(),
+      // 同日・同カテゴリが既存の場合は上書き（cronの再実行・リトライに対応）
+      const { error: insertError } = await supabase.from('daily_trends').upsert(
+        {
+          date: today,
+          topic_category: cat.key,
+          content,
+          raw_data: {
+            model: 'gemini-2.5-flash',
+            generated_at: new Date().toISOString(),
+          },
         },
-      })
+        { onConflict: 'date,topic_category' }
+      )
 
       if (insertError) throw new Error(insertError.message)
 
       sections.push(`## ${cat.label}\n\n${content}`)
+      contentMap.set(cat.key, content)
       results.push({ category: cat.key, success: true })
     } catch (err) {
       results.push({
@@ -125,6 +134,18 @@ export async function GET(request: Request) {
       await writeFile(path.join(dir, `${dateSlug}.md`), mdContent, 'utf-8')
     } catch (fileErr) {
       console.error('[cron/collect] MDファイル書き込み失敗:', fileErr)
+    }
+  }
+
+  // 成功したカテゴリのトレンドを LINE Flex Message で送信
+  if (contentMap.size > 0) {
+    const linePayload: TrendEntry[] = Array.from(contentMap.entries()).map(
+      ([topic_category, content]) => ({ topic_category, content })
+    )
+    try {
+      await sendTrendReport(linePayload, today)
+    } catch (lineErr) {
+      console.error('[cron/collect] LINE 送信失敗:', lineErr)
     }
   }
 

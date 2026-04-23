@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test tests/lib/crypto.test.mjs tests/lib/topic-filter.test.mjs tests/lib/line-format.test.mjs tests/lib/twitter-creds.test.mjs tests/api/generate-logic.test.mjs tests/api/post-logic.test.mjs tests/api/webhook-logic.test.mjs tests/ui/dashboard-filter.test.mjs tests/api/cron-collect-logic.test.mjs tests/api/cron-metrics-logic.test.mjs tests/api/cron-scheduled-logic.test.mjs tests/api/personas-api-logic.test.mjs"
+    "test": "node --test tests/lib/crypto.test.mjs tests/lib/topic-filter.test.mjs tests/lib/line-format.test.mjs tests/lib/twitter-creds.test.mjs tests/lib/line-flex.test.mjs tests/api/generate-logic.test.mjs tests/api/post-logic.test.mjs tests/api/webhook-logic.test.mjs tests/api/webhook-commands.test.mjs tests/ui/dashboard-filter.test.mjs tests/api/cron-collect-logic.test.mjs tests/api/cron-metrics-logic.test.mjs tests/api/cron-scheduled-logic.test.mjs tests/api/personas-api-logic.test.mjs"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
