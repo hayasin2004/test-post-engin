@@ -48,7 +48,7 @@ export async function generateTweet(persona: Persona): Promise<string> {
   const tools: Tool[] = [{ googleSearch: {} } as unknown as Tool]
 
   const model = genAI.getGenerativeModel({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-2.5-flash',
     tools,
   })
 
