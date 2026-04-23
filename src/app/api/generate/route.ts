@@ -19,6 +19,20 @@ import { sendTweetNotification } from '@/lib/line'
  * }
  */
 export async function POST() {
+  // 本日のトレンド情報を取得（収集済みであればプロンプトに注入する）
+  const today = new Date().toISOString().slice(0, 10)
+  const { data: trendsData } = await supabase
+    .from('daily_trends')
+    .select('topic_category, content')
+    .eq('date', today)
+
+  const todayTrends =
+    trendsData && trendsData.length > 0
+      ? (trendsData as Array<{ topic_category: string; content: string }>)
+          .map((t) => `[${t.topic_category}]\n${t.content}`)
+          .join('\n\n')
+      : undefined
+
   // 全ペルソナを取得
   const { data: personas, error: fetchError } = await supabase
     .from('personas')
@@ -45,8 +59,8 @@ export async function POST() {
 
   for (const persona of personas as Persona[]) {
     const result = await (async () => {
-      // Gemini でツイート生成
-      const content = await generateTweet(persona)
+      // Gemini でツイート生成（本日のトレンドがあれば参考情報として注入）
+      const content = await generateTweet(persona, todayTrends)
 
       // posts テーブルへ保存
       const { data: post, error: insertError } = await supabase

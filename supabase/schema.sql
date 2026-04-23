@@ -71,3 +71,29 @@ DROP TRIGGER IF EXISTS trg_settings_updated_at ON settings;
 CREATE TRIGGER trg_settings_updated_at
   BEFORE UPDATE ON settings
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- ============================================================
+-- daily_trends テーブル（トレンド収集エンジン用）
+-- ============================================================
+CREATE TABLE IF NOT EXISTS daily_trends (
+  id             UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
+  date           DATE        NOT NULL,
+  topic_category TEXT        NOT NULL,  -- tech / market / sns / local
+  content        TEXT        NOT NULL,  -- Gemini が要約したトレンド内容
+  raw_data       JSONB,                 -- 生データ（モデル名・生成時刻など）
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+COMMENT ON TABLE  daily_trends                IS '毎朝収集した日次トレンド情報（Cronジョブで自動更新）';
+COMMENT ON COLUMN daily_trends.date           IS 'トレンド収集日（yyyy-mm-dd）';
+COMMENT ON COLUMN daily_trends.topic_category IS 'カテゴリ識別子: tech / market / sns / local';
+COMMENT ON COLUMN daily_trends.content        IS 'Gemini googleSearch が要約したトレンド本文';
+COMMENT ON COLUMN daily_trends.raw_data       IS 'モデル名・生成時刻などのメタ情報';
+
+-- 同日・同カテゴリの二重登録を防ぐユニーク制約
+CREATE UNIQUE INDEX IF NOT EXISTS idx_daily_trends_date_category
+  ON daily_trends(date, topic_category);
+
+-- 日付での高速検索用インデックス
+CREATE INDEX IF NOT EXISTS idx_daily_trends_date
+  ON daily_trends(date DESC);

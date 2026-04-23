@@ -6,12 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --test tests/lib/crypto.test.mjs tests/lib/topic-filter.test.mjs tests/lib/line-format.test.mjs tests/lib/twitter-creds.test.mjs tests/api/generate-logic.test.mjs tests/api/post-logic.test.mjs tests/api/webhook-logic.test.mjs tests/ui/dashboard-filter.test.mjs tests/api/cron-collect-logic.test.mjs"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@line/bot-sdk": "^11.0.0",
+    "@supabase/supabase-js": "^2.104.0",
     "next": "16.2.4",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "twitter-api-v2": "^1.29.0"
   },
   "devDependencies": {
     "@types/node": "^20",
