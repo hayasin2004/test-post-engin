@@ -1,0 +1,112 @@
+name: Scheduled Cron Jobs
+
+# ============================================================
+# GitHub Actions でVercelのCron APIエンドポイントを定期実行する
+# Vercel Hobby プランではカスタム時刻のCronが使えないため、
+# こちらでスケジューリングを代替する。
+#
+# 必要なRepository Secrets（Settings > Secrets and variables > Actions）:
+#   VERCEL_APP_URL  : デプロイ先のURL（例: https://your-app.vercel.app）
+#   CRON_SECRET     : .env.local の CRON_SECRET と同じ値
+# ============================================================
+
+on:
+  schedule:
+    # ① トレンド収集 + LINE通知: 毎朝 10:00 JST (= UTC 01:00)
+    - cron: '0 1 * * *'
+
+    # ② メトリクス集計: 毎朝 12:00 JST (= UTC 03:00)
+    - cron: '0 3 * * *'
+
+    # ③ スケジュール投稿チェック: 30分ごと
+    - cron: '*/30 * * * *'
+
+  # 手動実行用（GitHub の Actions タブから「Run workflow」で起動可能）
+  workflow_dispatch:
+    inputs:
+      target:
+        description: '実行するジョブを選択'
+        required: true
+        default: 'collect'
+        type: choice
+        options:
+          - collect
+          - metrics
+          - post-scheduled
+          - all
+
+jobs:
+  # ----------------------------------------------------------
+  # ① トレンド収集 + LINE通知
+  # ----------------------------------------------------------
+  collect:
+    name: 📊 トレンド収集 & LINE通知 (10:00 JST)
+    runs-on: ubuntu-latest
+    # UTC 01:00 のみ実行 または 手動で collect / all を選択した場合
+    if: |
+      (github.event_name == 'schedule' && github.event.schedule == '0 1 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (inputs.target == 'collect' || inputs.target == 'all'))
+    steps:
+      - name: /api/cron/collect を呼び出す
+        run: |
+          echo "🚀 トレンド収集を開始します..."
+          HTTP_STATUS=$(curl -s -o /tmp/collect_response.txt -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.VERCEL_APP_URL }}/api/cron/collect")
+          echo "レスポンス: $(cat /tmp/collect_response.txt)"
+          echo "HTTPステータス: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -ge 400 ]; then
+            echo "❌ エラーが発生しました (HTTP $HTTP_STATUS)"
+            exit 1
+          fi
+          echo "✅ トレンド収集が完了しました"
+
+  # ----------------------------------------------------------
+  # ② メトリクス集計
+  # ----------------------------------------------------------
+  metrics:
+    name: 📈 メトリクス集計 (12:00 JST)
+    runs-on: ubuntu-latest
+    # UTC 03:00 のみ実行 または 手動で metrics / all を選択した場合
+    if: |
+      (github.event_name == 'schedule' && github.event.schedule == '0 3 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (inputs.target == 'metrics' || inputs.target == 'all'))
+    steps:
+      - name: /api/cron/metrics を呼び出す
+        run: |
+          echo "🚀 メトリクス集計を開始します..."
+          HTTP_STATUS=$(curl -s -o /tmp/metrics_response.txt -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.VERCEL_APP_URL }}/api/cron/metrics")
+          echo "レスポンス: $(cat /tmp/metrics_response.txt)"
+          echo "HTTPステータス: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -ge 400 ]; then
+            echo "❌ エラーが発生しました (HTTP $HTTP_STATUS)"
+            exit 1
+          fi
+          echo "✅ メトリクス集計が完了しました"
+
+  # ----------------------------------------------------------
+  # ③ スケジュール投稿チェック（X 自動投稿）
+  # ----------------------------------------------------------
+  post-scheduled:
+    name: 🐦 スケジュール投稿チェック (30分ごと)
+    runs-on: ubuntu-latest
+    # 30分ごと のみ実行 または 手動で post-scheduled / all を選択した場合
+    if: |
+      (github.event_name == 'schedule' && github.event.schedule == '*/30 * * * *') ||
+      (github.event_name == 'workflow_dispatch' && (inputs.target == 'post-scheduled' || inputs.target == 'all'))
+    steps:
+      - name: /api/cron/post-scheduled を呼び出す
+        run: |
+          echo "🚀 スケジュール投稿チェックを開始します..."
+          HTTP_STATUS=$(curl -s -o /tmp/post_response.txt -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.VERCEL_APP_URL }}/api/cron/post-scheduled")
+          echo "レスポンス: $(cat /tmp/post_response.txt)"
+          echo "HTTPステータス: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -ge 400 ]; then
+            echo "❌ エラーが発生しました (HTTP $HTTP_STATUS)"
+            exit 1
+          fi
+          echo "✅ スケジュール投稿チェックが完了しました"

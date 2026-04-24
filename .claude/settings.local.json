@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(node *)",
+      "Bash(npm info *)",
+      "Bash(npm view *)",
+      "Bash(git init *)",
+      "Bash(npx create-next-app@latest . --typescript --eslint --no-tailwind --src-dir --app --no-turbopack --import-alias \"@/*\" --yes)",
+      "Bash(npx create-next-app@latest . --typescript --eslint --no-tailwind --src-dir --app --no-turbopack --import-alias \"@/*\" --yes --name engineer-auto-post)",
+      "Bash(cp C:/Users/Masat/AppData/Local/Temp/engineer-auto-post/eslint.config.mjs C:/Users/Masat/OneDrive/デスクトップ/HAL4年/個人開発/模擬エンジニア学生/Engineer_Auto_Post/)",
+      "Bash(cp C:/Users/Masat/AppData/Local/Temp/engineer-auto-post/next.config.ts C:/Users/Masat/OneDrive/デスクトップ/HAL4年/個人開発/模擬エンジニア学生/Engineer_Auto_Post/)",
+      "Bash(cp C:/Users/Masat/AppData/Local/Temp/engineer-auto-post/next-env.d.ts C:/Users/Masat/OneDrive/デスクトップ/HAL4年/個人開発/模擬エンジニア学生/Engineer_Auto_Post/)",
+      "Bash(cp C:/Users/Masat/AppData/Local/Temp/engineer-auto-post/package.json C:/Users/Masat/OneDrive/デスクトップ/HAL4年/個人開発/模擬エンジニア学生/Engineer_Auto_Post/)",
+      "Bash(cp C:/Users/Masat/AppData/Local/Temp/engineer-auto-post/package-lock.json C:/Users/Masat/OneDrive/デスクトップ/HAL4年/個人開発/模擬エンジニア学生/Engineer_Auto_Post/)",
+      "Bash(npm install *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(npx vercel *)"
+    ]
+  }
+}

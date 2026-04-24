@@ -1,7 +1,1 @@
-{
-  "crons": [
-    { "path": "/api/cron/collect",        "schedule": "0 1 * * *"  },
-    { "path": "/api/cron/metrics",        "schedule": "0 3 * * *"  },
-    { "path": "/api/cron/post-scheduled", "schedule": "*/30 * * * *" }
-  ]
-}
+{}
