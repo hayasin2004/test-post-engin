@@ -18,8 +18,8 @@ on:
     # ② メトリクス集計: 毎朝 12:00 JST (= UTC 03:00)
     - cron: '0 3 * * *'
 
-    # ③ スケジュール投稿チェック: 30分ごと
-    - cron: '*/30 * * * *'
+    # ③ スケジュール投稿チェック: 5分ごと
+    - cron: '*/5 * * * *'
 
   # 手動実行用（GitHub の Actions タブから「Run workflow」で起動可能）
   workflow_dispatch:
@@ -92,9 +92,9 @@ jobs:
   post-scheduled:
     name: 🐦 スケジュール投稿チェック (30分ごと)
     runs-on: ubuntu-latest
-    # 30分ごと のみ実行 または 手動で post-scheduled / all を選択した場合
+    # 5分ごと のみ実行 または 手動で post-scheduled / all を選択した場合
     if: |
-      (github.event_name == 'schedule' && github.event.schedule == '*/30 * * * *') ||
+      (github.event_name == 'schedule' && github.event.schedule == '*/5 * * * *') ||
       (github.event_name == 'workflow_dispatch' && (inputs.target == 'post-scheduled' || inputs.target == 'all'))
     steps:
       - name: /api/cron/post-scheduled を呼び出す
